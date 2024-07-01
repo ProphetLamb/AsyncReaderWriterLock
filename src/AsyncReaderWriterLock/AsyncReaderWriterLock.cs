@@ -67,6 +67,8 @@ public sealed record AsyncReaderWriterLockOptions
 
         return new(RunContinuationsAsynchronously, elevated, VacuumQueueInterval, TimeProvider);
     }
+
+    public static AsyncReaderWriterLockOptions Default { get; } = new();
 }
 
 /// <summary>
@@ -101,6 +103,11 @@ public sealed partial class AsyncReaderWriterLock : IDisposable
     {
         _options = options.ToOptions();
         _cleanQueueStateTimer = CreateTimer(_options);
+    }
+
+    public AsyncReaderWriterLock()
+        : this(AsyncReaderWriterLockOptions.Default)
+    {
     }
 
     private ITimer? CreateTimer(Options options)
