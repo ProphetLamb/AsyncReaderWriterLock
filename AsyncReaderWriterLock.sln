@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{81187F68-6A56-4A14-AF5E-608846BE11D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncReaderWriterLock", "src\AsyncReaderWriterLock\AsyncReaderWriterLock.csproj", "{96CDD165-D279-495E-B30E-8C253E405595}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CA2082E1-FF1D-4CC6-A70A-9F383672F138}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncReaderWriterLock.Tests", "test\AsyncReaderWriterLock.Tests\AsyncReaderWriterLock.Tests.csproj", "{358555DB-4C90-424B-B6C3-C7BF89C7DCE6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmark", "benchmark", "{A269B7BC-EB61-4534-A785-E4D5D0B6334F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncReaderWriterLock.Benchmark", "benchmark\AsyncReaderWriterLock.Benchmark\AsyncReaderWriterLock.Benchmark.csproj", "{8426D1CB-4C91-4700-96EC-425724690B12}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96CDD165-D279-495E-B30E-8C253E405595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96CDD165-D279-495E-B30E-8C253E405595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96CDD165-D279-495E-B30E-8C253E405595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96CDD165-D279-495E-B30E-8C253E405595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{358555DB-4C90-424B-B6C3-C7BF89C7DCE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{358555DB-4C90-424B-B6C3-C7BF89C7DCE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{358555DB-4C90-424B-B6C3-C7BF89C7DCE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{358555DB-4C90-424B-B6C3-C7BF89C7DCE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8426D1CB-4C91-4700-96EC-425724690B12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8426D1CB-4C91-4700-96EC-425724690B12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8426D1CB-4C91-4700-96EC-425724690B12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8426D1CB-4C91-4700-96EC-425724690B12}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{96CDD165-D279-495E-B30E-8C253E405595} = {81187F68-6A56-4A14-AF5E-608846BE11D9}
+		{358555DB-4C90-424B-B6C3-C7BF89C7DCE6} = {CA2082E1-FF1D-4CC6-A70A-9F383672F138}
+		{8426D1CB-4C91-4700-96EC-425724690B12} = {A269B7BC-EB61-4534-A785-E4D5D0B6334F}
+	EndGlobalSection
+EndGlobal
