@@ -66,7 +66,9 @@ public class FuzzHelper
         List<Thread> ts = [];
         for (int i = 0; i < Environment.ProcessorCount; i++)
         {
-            ts.Add(new(Write));
+            Thread t = new(Write);
+            t.Start();
+            ts.Add(t);
         }
         var read = Read();
 
