@@ -35,14 +35,14 @@ public partial class AsyncReaderWriterLock
     }
 
     [DebuggerDisplay("{ToString(),nq}")]
-    private readonly ref struct State(nuint value)
+    internal readonly ref struct State(nuint value)
     {
         // 31/63 =============================== 0
         //       |||___________________________|
         //       ||          ReadCount
         //       |Upgrade
         //  QueueChanged
-        private static readonly nuint FlagQueueChanged = unchecked(~nuint.MaxValue >> 1);
+        private static readonly nuint FlagQueueChanged = unchecked(~(nuint.MaxValue >> 1));
         private static readonly nuint FlagUpgrade = unchecked(~nuint.RotateRight(nuint.MaxValue >> 1, 1));
         private static readonly nuint FlagWrite = unchecked(nuint.MaxValue >> 2);
 

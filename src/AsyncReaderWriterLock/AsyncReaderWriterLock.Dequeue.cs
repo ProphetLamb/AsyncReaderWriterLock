@@ -48,7 +48,7 @@ public partial class AsyncReaderWriterLock
 
             Debug.Assert(state.IsWrite);
             // exiting a writeupgrade into readupgrade => one additional read remaining
-            if (!_state.Cas(state, State.FromRead(dequeue.ReadCount + (nuint)(state.IsUpgrade ? 1 : 0)).QueueChanged(dequeue.IsQueueRemaining).Upgrade(dequeue.IsUpgrade)))
+            if (!_state.Cas(state, State.FromRead(dequeue.ReadCount + (nuint)(dequeue.IsUpgrade ? 1 : 0)).QueueChanged(dequeue.IsQueueRemaining).Upgrade(dequeue.IsUpgrade)))
             {
                 continue;
             }

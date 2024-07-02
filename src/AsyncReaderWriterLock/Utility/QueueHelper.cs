@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace AsyncReaderWriterLock;
+namespace System.Threading;
 
 internal static class QueueHelper
 {

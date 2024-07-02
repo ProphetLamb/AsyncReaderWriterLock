@@ -1,27 +1,50 @@
 using System.Diagnostics;
-using ARWL = System.Threading.AsyncReaderWriterLock;
-namespace AsyncReaderWriterLock.Tests;
+using System.Security.Cryptography;
+using NUnit.Framework.Internal;
+namespace System.Threading.Tests;
 
 public sealed class FuzzingTests
 {
-    [Test]
-    public async Task FuzzARWL()
+    private static IEnumerable<FuzzOptions> GetFuzzOptions()
     {
-        ARWL rwLock = new();
-        await FuzzExecute(rwLock, FuzzARWLStates.Create(new(0.6, 0.2, 0.2, 0.5)), Random.Shared);
+        double[] readWeights = [0.80, 0.79, 0.70, 0.50, 0.25, 0.00];
+        double[] writeWeights = [0.00, 0.01, 0.10, 0.25];
+        double[] readUpgradeableWeights = [0.00, 0.10, 0.25];
+        double[] writeUpgradedWeights = [0.00, 0.20, 0.40, 0.60];
+        return readWeights
+            .CombineIntersection(writeWeights)
+            .CombineIntersection(readUpgradeableWeights)
+            .CombineIntersection(writeUpgradedWeights)
+            .Select(t => new FuzzOptions(t.Inner.Inner.Inner, t.Inner.Inner.Outer, t.Inner.Outer, t.Outer))
+            .Where(o => o.ReadWeight + o.WriteWeight > double.Epsilon) // remove cases with no read or write weight
+            .Where(o => o.ReadUpgradableWeight != 0.00 || o.WriteUpgradedWeight == 0.00); // remove cases with writeupgrade but no readupgrade weight
+    }
+
+    private static IEnumerable<TestCaseData> GetParameters()
+    {
+        return TestHelper.GetOptionCombinations()
+            .CombineIntersection(GetFuzzOptions())
+            .Select(t => new TestCaseData(t.Inner, t.Outer));
+    }
+
+    [Test, TestCaseSource(nameof(GetParameters))]
+    public async Task FuzzAsyncReaderWriterLock(AsyncReaderWriterLockOptions lockOptions, FuzzOptions fuzzOptions)
+    {
+        AsyncReaderWriterLock rwLock = new(lockOptions);
+        await FuzzExecute(rwLock, FuzzAsyncReaderWriterLockStates.Create(fuzzOptions), new Random(unchecked((int)0xbeefcace)));
     }
 
     private static async Task FuzzExecute<TLock>(TLock rwLock, IReadOnlyDictionary<Fuzz<TLock>, FuzzState<TLock>> fuzzStates, Random rng)
     {
         CancellationTokenSource cts = new();
         int count = 0;
-        List<Task> pendingTasks = new(4096);
+        List<Task<bool>> pendingTasks = new(4096);
         foreach (var state in FuzzProvider(fuzzStates, rng, cts.Token))
         {
             var holdDelay = TimeSpan.FromMilliseconds(rng.NextDouble() * 10);
             try
             {
-                var t = state(rwLock, holdDelay, Timeout.Infinite, default);
+                var t = state(rwLock, holdDelay, 10000, default);
                 if (!t.IsCompletedSuccessfully)
                 {
                     pendingTasks.Add(t);
@@ -35,12 +58,22 @@ public sealed class FuzzingTests
 
             if (count >= 100000)
             {
-                cts.Cancel(true);
+                break;
             }
 
             count++;
         }
-        await Task.WhenAll(pendingTasks.Where(t => !t.IsCompletedSuccessfully));
+
+        try
+        {
+            var results = await Task.WhenAll(pendingTasks.Where(t => !t.IsCompletedSuccessfully));
+            cts.Cancel(false);
+            Assert.That(results.All(isAcquired => isAcquired));
+        }
+        catch (OperationCanceledException)
+        {
+            // expected cancellation
+        }
     }
 
     private static IEnumerable<Fuzz<TLock>> FuzzProvider<TLock>(IReadOnlyDictionary<Fuzz<TLock>, FuzzState<TLock>> fuzzStates, Random rng, CancellationToken cancellationToken)
@@ -84,16 +117,16 @@ public sealed class FuzzingTests
 
     private sealed record FuzzState<TLock>(Fuzz<TLock> Fuzz, List<Fuzz<TLock>> TransitionInto, double Probability);
 
-    private sealed record FuzzOptions(double ReadWeight, double WriteWeight, double ReadUpgradableWeight, double WriteUpgradedWeight);
+    public sealed record FuzzOptions(double ReadWeight, double WriteWeight, double ReadUpgradableWeight, double WriteUpgradedWeight);
 
-    private static class FuzzARWLStates
+    private static class FuzzAsyncReaderWriterLockStates
     {
-        internal static Dictionary<Fuzz<ARWL>, FuzzState<ARWL>> Create(FuzzOptions options)
+        internal static Dictionary<Fuzz<AsyncReaderWriterLock>, FuzzState<AsyncReaderWriterLock>> Create(FuzzOptions options)
         {
-            List<Fuzz<ARWL>> rorwru = [FuzzRead, FuzzWrite, FuzzReadUpgradable];
+            List<Fuzz<AsyncReaderWriterLock>> rorwru = [FuzzRead, FuzzWrite, FuzzReadUpgradable];
             return new()
             {
-                [FuzzNoop<ARWL>] = new(FuzzNoop<ARWL>, rorwru, 0.0),
+                [FuzzNoop<AsyncReaderWriterLock>] = new(FuzzNoop<AsyncReaderWriterLock>, rorwru, 0.0),
                 [FuzzRead] = new(FuzzRead, rorwru, options.ReadWeight),
                 [FuzzReadUpgradable] = new(FuzzReadUpgradable, [.. rorwru, FuzzWriteUpgraded], options.ReadUpgradableWeight),
                 [FuzzWrite] = new(FuzzWrite, rorwru, options.WriteWeight),
@@ -101,27 +134,31 @@ public sealed class FuzzingTests
             };
         }
 
-        private static async Task<bool> FuzzRead(ARWL rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
+        private static async Task<bool> FuzzRead(AsyncReaderWriterLock rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             using var l = await rwLock.UsingReadAsync(false, millisecondsTimeout, cancellationToken);
+            Debug.Assert(l.IsAcquired);
             await Task.Delay(holdDelay, cancellationToken);
             return l.IsAcquired;
         }
-        private static async Task<bool> FuzzWrite(ARWL rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
+        private static async Task<bool> FuzzWrite(AsyncReaderWriterLock rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             using var l = await rwLock.UsingWriteAsync(false, millisecondsTimeout, cancellationToken);
+            Debug.Assert(l.IsAcquired);
             await Task.Delay(holdDelay, cancellationToken);
             return l.IsAcquired;
         }
-        private static async Task<bool> FuzzReadUpgradable(ARWL rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
+        private static async Task<bool> FuzzReadUpgradable(AsyncReaderWriterLock rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             using var l = await rwLock.UsingReadUpgradableAsync(false, millisecondsTimeout, cancellationToken);
+            Debug.Assert(l.IsAcquired);
             await Task.Delay(holdDelay, cancellationToken);
             return l.IsAcquired;
         }
-        private static async Task<bool> FuzzWriteUpgraded(ARWL rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
+        private static async Task<bool> FuzzWriteUpgraded(AsyncReaderWriterLock rwLock, TimeSpan holdDelay, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             var isAcquired = await AsyncReaderWriterLockMarshal.EnterWriteUpgrade(rwLock, millisecondsTimeout, cancellationToken);
+            Debug.Assert(isAcquired);
             try
             {
                 await Task.Delay(holdDelay, cancellationToken);

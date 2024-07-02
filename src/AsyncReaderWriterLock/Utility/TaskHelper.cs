@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks.Sources;
 
-namespace AsyncReaderWriterLock;
+namespace System.Threading;
 
 internal static class TaskHelper
 {

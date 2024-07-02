@@ -119,6 +119,8 @@ public sealed partial class AsyncReaderWriterLock : IDisposable
 
     private ref Queue WriteQueue => ref (_options.Elevated == ElevatedKind.Write ? ref _elevatedQueue : ref _queue);
 
+    internal State GetState() => _state.Read();
+
     private static void OnCleanQueueStateTimerElapsed(object? state)
     {
         var self = (AsyncReaderWriterLock)state!;
