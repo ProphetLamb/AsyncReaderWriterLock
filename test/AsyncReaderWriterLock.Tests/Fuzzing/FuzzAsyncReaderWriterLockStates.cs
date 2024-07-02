@@ -4,7 +4,7 @@ namespace System.Threading.Tests.Fuzzing;
 
 public static class FuzzAsyncReaderWriterLockStates
 {
-    internal static Dictionary<FuzzAsync<AsyncReaderWriterLock>, FuzzStateAsync<AsyncReaderWriterLock>> CreateAsync(FuzzOptions options)
+    public static Dictionary<FuzzAsync<AsyncReaderWriterLock>, FuzzStateAsync<AsyncReaderWriterLock>> CreateAsync(FuzzOptions options)
     {
         List<FuzzAsync<AsyncReaderWriterLock>> states = [FuzzReadAsync, FuzzWriteAsync, FuzzReadUpgradableAsync, FuzzWriteUpgradedAsync];
         return new()
@@ -16,7 +16,7 @@ public static class FuzzAsyncReaderWriterLockStates
             [FuzzWriteUpgradedAsync] = new(FuzzWriteUpgradedAsync, states, options.WriteUpgradedWeight),
         };
     }
-    internal static Dictionary<FuzzSync<AsyncReaderWriterLock>, FuzzStateSync<AsyncReaderWriterLock>> CreateSync(FuzzOptions options)
+    public static Dictionary<FuzzSync<AsyncReaderWriterLock>, FuzzStateSync<AsyncReaderWriterLock>> CreateSync(FuzzOptions options)
     {
         List<FuzzSync<AsyncReaderWriterLock>> states = [FuzzReadSync, FuzzWriteSync, FuzzReadUpgradableSync, FuzzWriteUpgradedSync];
         return new()
