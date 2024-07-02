@@ -14,9 +14,9 @@ public sealed class LockUncontendedTests
     {
         using (await rwLock.UsingReadAsync())
         {
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1 });
+            Assert.That(rwLock.GetState() is { ReadCount: 1 });
         }
-        Debug.Assert(rwLock.GetState() == default);
+        Assert.That(rwLock.GetState() == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -24,9 +24,9 @@ public sealed class LockUncontendedTests
     {
         using (rwLock.UsingRead())
         {
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1 });
+            Assert.That(rwLock.GetState() is { ReadCount: 1 });
         }
-        Debug.Assert(rwLock.GetState() == default);
+        Assert.That(rwLock.GetState() == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -34,9 +34,9 @@ public sealed class LockUncontendedTests
     {
         using (await rwLock.UsingReadUpgradableAsync())
         {
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
+            Assert.That(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
         }
-        Debug.Assert(rwLock.GetState() == default);
+        Assert.That(rwLock.GetState() == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -44,9 +44,9 @@ public sealed class LockUncontendedTests
     {
         using (rwLock.UsingReadUpgradable())
         {
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
+            Assert.That(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
         }
-        Debug.Assert(rwLock.GetState() == default);
+        Assert.That(rwLock.GetState() == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -54,9 +54,9 @@ public sealed class LockUncontendedTests
     {
         using (await rwLock.UsingWriteAsync())
         {
-            Debug.Assert(rwLock.GetState() is { IsWrite: true });
+            Assert.That(rwLock.GetState() is { IsWrite: true });
         }
-        Debug.Assert(rwLock.GetState().ReadCount == default);
+        Assert.That(rwLock.GetState().ReadCount == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -64,9 +64,9 @@ public sealed class LockUncontendedTests
     {
         using (rwLock.UsingWrite())
         {
-            Debug.Assert(rwLock.GetState() is { IsWrite: true });
+            Assert.That(rwLock.GetState() is { IsWrite: true });
         }
-        Debug.Assert(rwLock.GetState().ReadCount == default);
+        Assert.That(rwLock.GetState().ReadCount == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -74,14 +74,14 @@ public sealed class LockUncontendedTests
     {
         using (var l = await rwLock.UsingReadUpgradableAsync())
         {
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
+            Assert.That(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
             using (await l.UsingWriteUpgradeAsync())
             {
-                Debug.Assert(rwLock.GetState() is { IsWrite: true, IsUpgrade: true });
+                Assert.That(rwLock.GetState() is { IsWrite: true, IsUpgrade: true });
             }
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
+            Assert.That(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
         }
-        Debug.Assert(rwLock.GetState().ReadCount == default);
+        Assert.That(rwLock.GetState().ReadCount == default);
     }
 
     [Test, TestCaseSource(nameof(GetParameters))]
@@ -89,13 +89,13 @@ public sealed class LockUncontendedTests
     {
         using (var l = rwLock.UsingReadUpgradable())
         {
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
+            Assert.That(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
             using (l.UsingWriteUpgrade())
             {
-                Debug.Assert(rwLock.GetState() is { IsWrite: true, IsUpgrade: true });
+                Assert.That(rwLock.GetState() is { IsWrite: true, IsUpgrade: true });
             }
-            Debug.Assert(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
+            Assert.That(rwLock.GetState() is { ReadCount: 1, IsUpgrade: true });
         }
-        Debug.Assert(rwLock.GetState().ReadCount == default);
+        Assert.That(rwLock.GetState().ReadCount == default);
     }
 }

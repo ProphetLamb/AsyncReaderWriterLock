@@ -10,12 +10,6 @@ public static class TestHelper
         yield return new() { RunContinuationsAsynchronously = true, };
         yield return new() { ElevateReadQueue = true, RunContinuationsAsynchronously = true, };
         yield return new() { ElevateWriteQueue = true, RunContinuationsAsynchronously = true, };
-        yield return new() { VacuumQueueInterval = null, };
-        yield return new() { ElevateReadQueue = true, VacuumQueueInterval = null, };
-        yield return new() { ElevateWriteQueue = true, VacuumQueueInterval = null, };
-        yield return new() { RunContinuationsAsynchronously = true, VacuumQueueInterval = null, };
-        yield return new() { ElevateReadQueue = true, RunContinuationsAsynchronously = true, VacuumQueueInterval = null, };
-        yield return new() { ElevateWriteQueue = true, RunContinuationsAsynchronously = true, VacuumQueueInterval = null, };
     }
 
     internal static IEnumerable<(TInner Inner, TOuter Outer)> CombineIntersection<TInner, TOuter>(this IEnumerable<TInner> innerSeq, IEnumerable<TOuter> outerSeq)

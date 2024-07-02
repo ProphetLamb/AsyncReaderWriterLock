@@ -88,6 +88,24 @@ public partial class AsyncReaderWriterLock
 
     internal void ExitWriteUpgrade(ref SpinWait wait)
     {
-        ConsumeQueueUnderWrite(ref wait);
+        var state = _state.Read();
+        while (true)
+        {
+            State prev;
+            if (!state.IsWrite || !state.IsUpgrade)
+            {
+                ThrowHelper.ThrowInvalidOperation("Attempted to exit write upgraded state, but was not in write upgraded state.", null);
+            }
+
+            prev = _state.Cx(state, State.FromRead(1).Upgrade(true).QueueChanged(state.IsQueueChanged));
+            if (prev == state)
+            {
+                return;
+            }
+
+            var reloadState = wait.NextSpinWillYield;
+            wait.SpinOnce();
+            state = reloadState ? _state.Read() : prev;
+        }
     }
 }
